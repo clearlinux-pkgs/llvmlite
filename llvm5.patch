@@ -1,0 +1,232 @@
+diff --git a/ffi/build.py b/ffi/build.py
+index 4068818..06045b3 100755
+--- a/ffi/build.py
++++ b/ffi/build.py
+@@ -52,7 +52,7 @@ def find_win32_generator():
+     # compatible with, the one which was used to compile LLVM... cmake
+     # seems a bit lacking here.
+     cmake_dir = os.path.join(here_dir, 'dummy')
+-    # LLVM 4.0 needs VS 2015 minimum.
++    # LLVM 4.0+ needs VS 2015 minimum.
+     for generator in ['Visual Studio 14 2015']:
+         if is_64bit:
+             generator += ' Win64'
+@@ -95,9 +95,9 @@ def main_posix(kind, library_ext):
+ 
+     out = out.decode('latin1')
+     print(out)
+-    if not out.startswith('4.0.'):
++    if not out.startswith('5.0.'):
+         msg = (
+-            "Building llvmlite requires LLVM 4.0.x. Be sure to "
++            "Building llvmlite requires LLVM 5.0.x. Be sure to "
+             "set LLVM_CONFIG to the right executable path.\n"
+             "Read the documentation at http://llvmlite.pydata.org/ for more "
+             "information about building llvmlite.\n"
+diff --git a/ffi/executionengine.cpp b/ffi/executionengine.cpp
+index 8c691e8..3c252bf 100644
+--- a/ffi/executionengine.cpp
++++ b/ffi/executionengine.cpp
+@@ -93,12 +93,6 @@ LLVMPY_CreateMCJITCompiler(LLVMModuleRef M,
+     return create_execution_engine(M, TM, OutError);
+ }
+ 
+-API_EXPORT(void *)
+-LLVMPY_GetPointerToGlobal(LLVMExecutionEngineRef EE,
+-                          LLVMValueRef Global)
+-{
+-    return LLVMGetPointerToGlobal(EE, Global);
+-}
+ 
+ API_EXPORT(uint64_t)
+ LLVMPY_GetGlobalValueAddress(LLVMExecutionEngineRef EE,
+diff --git a/ffi/value.cpp b/ffi/value.cpp
+index 10beb33..a1b0017 100644
+--- a/ffi/value.cpp
++++ b/ffi/value.cpp
+@@ -74,11 +74,18 @@ LLVMPY_GetDLLStorageClass(LLVMValueRef Val)
+     return (int)LLVMGetDLLStorageClass(Val);
+ }
+ 
++API_EXPORT(unsigned)
++LLVMPY_GetEnumAttributeKindForName(const char *name, size_t len)
++{
++    /* zero is returned if no match */
++    return LLVMGetEnumAttributeKindForName(name, len);
++}
++
+ API_EXPORT(void)
+-LLVMPY_AddFunctionAttr(LLVMValueRef Fn, int Attr)
++LLVMPY_AddFunctionAttr(LLVMValueRef Fn, unsigned AttrKind)
+ {
+     LLVMContextRef ctx = LLVMGetModuleContext(LLVMGetGlobalParent(Fn));
+-    LLVMAttributeRef attr_ref = LLVMCreateEnumAttribute(ctx, Attr, 0);
++    LLVMAttributeRef attr_ref = LLVMCreateEnumAttribute(ctx, AttrKind, 0);
+     LLVMAddAttributeAtIndex(Fn, LLVMAttributeReturnIndex, attr_ref);
+ }
+ 
+diff --git a/llvmlite/binding/executionengine.py b/llvmlite/binding/executionengine.py
+index 8411c13..c14e15b 100755
+--- a/llvmlite/binding/executionengine.py
++++ b/llvmlite/binding/executionengine.py
+@@ -57,31 +57,21 @@ class ExecutionEngine(ffi.ObjectRef):
+         module._owned = True
+         ffi.ObjectRef.__init__(self, ptr)
+ 
+-    def get_pointer_to_function(self, gv):
+-        warnings.warn(".get_pointer_to_function() is deprecated.  Use "
+-                      ".get_function_address() instead.", DeprecationWarning)
+-        ptr = ffi.lib.LLVMPY_GetPointerToGlobal(self, gv)
+-        if ptr is None:
+-            raise ValueError("Cannot find given global value %r" % (gv.name))
+-        return ptr
+-
+     def get_function_address(self, name):
+         """
+         Return the address of the function named *name* as an integer.
++
++        It's a fatal error in LLVM if the symbol of *name* doesn't exist.
+         """
+-        ptr = ffi.lib.LLVMPY_GetFunctionAddress(self, name.encode("ascii"))
+-        if ptr is None:
+-            raise ValueError("Cannot find given function %s" % name)
+-        return ptr
++        return ffi.lib.LLVMPY_GetFunctionAddress(self, name.encode("ascii"))
+ 
+     def get_global_value_address(self, name):
+         """
+         Return the address of the global value named *name* as an integer.
++
++        It's a fatal error in LLVM if the symbol of *name* doesn't exist.
+         """
+-        ptr = ffi.lib.LLVMPY_GetGlobalValueAddress(self, name.encode("ascii"))
+-        if ptr is None:
+-            raise ValueError("Cannot find given global value %s" % name)
+-        return ptr
++        return ffi.lib.LLVMPY_GetGlobalValueAddress(self, name.encode("ascii"))
+ 
+     def add_global_mapping(self, gv, addr):
+         # XXX unused?
+@@ -245,10 +235,6 @@ ffi.lib.LLVMPY_AddModule.argtypes = [
+     ffi.LLVMModuleRef
+ ]
+ 
+-ffi.lib.LLVMPY_GetPointerToGlobal.argtypes = [ffi.LLVMExecutionEngineRef,
+-                                              ffi.LLVMValueRef]
+-ffi.lib.LLVMPY_GetPointerToGlobal.restype = c_void_p
+-
+ ffi.lib.LLVMPY_AddGlobalMapping.argtypes = [ffi.LLVMExecutionEngineRef,
+                                             ffi.LLVMValueRef,
+                                             c_void_p]
+diff --git a/llvmlite/binding/value.py b/llvmlite/binding/value.py
+index 379c2d2..57078db 100644
+--- a/llvmlite/binding/value.py
++++ b/llvmlite/binding/value.py
+@@ -1,5 +1,4 @@
+-
+-from ctypes import POINTER, c_char_p, c_int
++from ctypes import POINTER, c_char_p, c_int, c_size_t, c_uint
+ import enum
+ 
+ from . import ffi
+@@ -28,37 +27,6 @@ class Linkage(enum.IntEnum):
+     linker_private_weak = 16
+ 
+ 
+-class Attribute(enum.Enum):
+-    # The LLVMAttribute enum from llvm-c/Core.h
+-
+-    zext = 1 << 0
+-    sext = 1 << 1
+-    noreturn = 1 << 2
+-    inreg = 1 << 3
+-    structret = 1 << 4
+-    nounwind = 1 << 5
+-    noalias = 1 << 6
+-    byval = 1 << 7
+-    nest = 1 << 8
+-    readnone = 1 << 9
+-    readonly = 1 << 10
+-    noinline = 1 << 11
+-    alwaysinline = 1 << 12
+-    optimizeforsize = 1 << 13
+-    stackprotect = 1 << 14
+-    stackprotectreq = 1 << 15
+-
+-    nocapture = 1 << 21
+-    noredzone = 1 << 22
+-    noimplicitfloat = 1 << 23
+-    naked = 1 << 24
+-    inlinehint = 1 << 25
+-
+-    returnstwice = 1 << 29
+-    uwtable = 1 << 30
+-    nonlazybind = 1 << 31
+-
+-
+ class Visibility(enum.IntEnum):
+     # The LLVMVisibility enum from llvm-c/Core.h
+ 
+@@ -134,11 +102,19 @@ class ValueRef(ffi.ObjectRef):
+         ffi.lib.LLVMPY_SetDLLStorageClass(self, value)
+ 
+     def add_function_attribute(self, attr):
+-        """Only works on function value"""
+-        # XXX unused?
+-        if not isinstance(attr, Attribute):
+-            attr = Attribute[attr]
+-        ffi.lib.LLVMPY_AddFunctionAttr(self, attr.value)
++        """Only works on function value
++
++        Parameters
++        -----------
++        attr : str
++            attribute name
++        """
++        attrname = str(attr)
++        attrval = ffi.lib.LLVMPY_GetEnumAttributeKindForName(
++            _encode_string(attrname), len(attrname))
++        if attrval == 0:
++            raise ValueError('no such attribute {!r}'.format(attrname))
++        ffi.lib.LLVMPY_AddFunctionAttr(self, attrval)
+ 
+     @property
+     def type(self):
+@@ -190,7 +166,10 @@ ffi.lib.LLVMPY_GetDLLStorageClass.restype = c_int
+ 
+ ffi.lib.LLVMPY_SetDLLStorageClass.argtypes = [ffi.LLVMValueRef, c_int]
+ 
+-ffi.lib.LLVMPY_AddFunctionAttr.argtypes = [ffi.LLVMValueRef, c_int]
++ffi.lib.LLVMPY_GetEnumAttributeKindForName.argtypes = [c_char_p, c_size_t]
++ffi.lib.LLVMPY_GetEnumAttributeKindForName.restype = c_uint
++
++ffi.lib.LLVMPY_AddFunctionAttr.argtypes = [ffi.LLVMValueRef, c_uint]
+ 
+ ffi.lib.LLVMPY_IsDeclaration.argtypes = [ffi.LLVMValueRef]
+ ffi.lib.LLVMPY_IsDeclaration.restype = c_int
+diff --git a/llvmlite/tests/test_binding.py b/llvmlite/tests/test_binding.py
+index 6821d70..628e8f9 100644
+--- a/llvmlite/tests/test_binding.py
++++ b/llvmlite/tests/test_binding.py
+@@ -297,7 +297,7 @@ class TestMisc(BaseTest):
+ 
+     def test_version(self):
+         major, minor, patch = llvm.llvm_version_info
+-        self.assertEqual((major, minor), (4, 0))
++        self.assertEqual((major, minor), (5, 0))
+         self.assertIn(patch, range(10))
+ 
+     def test_check_jit_execution(self):
+@@ -750,7 +750,11 @@ class TestValueRef(BaseTest):
+     def test_add_function_attribute(self):
+         mod = self.module()
+         fn = mod.get_function("sum")
+-        fn.add_function_attribute("zext")
++        fn.add_function_attribute("nocapture")
++        with self.assertRaises(ValueError) as raises:
++            fn.add_function_attribute("zext")
++        self.assertEqual(str(raises.exception), "no such attribute 'zext'")
++
+ 
+     def test_module(self):
+         mod = self.module()
