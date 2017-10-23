@@ -4,7 +4,7 @@
 #
 Name     : llvmlite
 Version  : 0.20.0
-Release  : 2
+Release  : 3
 URL      : http://pypi.debian.net/llvmlite/llvmlite-0.20.0.tar.gz
 Source0  : http://pypi.debian.net/llvmlite/llvmlite-0.20.0.tar.gz
 Summary  : lightweight wrapper around basic LLVM functionality
