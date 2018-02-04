@@ -1,0 +1,25 @@
+From 30d4fc0d8bbf7a5214306b5bbc5d0572dbf3d472 Mon Sep 17 00:00:00 2001
+From: William Douglas <william.douglas@intel.com>
+Date: Sun, 4 Feb 2018 01:26:47 +0000
+Subject: [PATCH] Use fPIC as recommended by ld
+
+---
+ ffi/build.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ffi/build.py b/ffi/build.py
+index 06045b3..ca87d40 100755
+--- a/ffi/build.py
++++ b/ffi/build.py
+@@ -110,7 +110,7 @@ def main_posix(kind, library_ext):
+     os.environ['LLVM_LIBS'] = ' '.join(libs.split())
+ 
+     cxxflags = run_llvm_config(llvm_config, ["--cxxflags"])
+-    cxxflags = cxxflags.split() + ['-fno-rtti', '-g']
++    cxxflags = cxxflags.split() + ['-fno-rtti', '-g', '-fPIC']
+     os.environ['LLVM_CXXFLAGS'] = ' '.join(cxxflags)
+ 
+     ldflags = run_llvm_config(llvm_config, ["--ldflags"])
+-- 
+2.15.1
+

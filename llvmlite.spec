@@ -4,12 +4,12 @@
 #
 Name     : llvmlite
 Version  : 0.21.0
-Release  : 6
+Release  : 7
 URL      : http://pypi.debian.net/llvmlite/llvmlite-0.21.0.tar.gz
 Source0  : http://pypi.debian.net/llvmlite/llvmlite-0.21.0.tar.gz
 Summary  : lightweight wrapper around basic LLVM functionality
 Group    : Development/Tools
-License  : BSD-3-Clause
+License  : BSD-2-Clause
 Requires: llvmlite-python3
 Requires: llvmlite-python
 BuildRequires : cmake
@@ -20,6 +20,7 @@ BuildRequires : pip
 BuildRequires : python-dev
 BuildRequires : python3-dev
 BuildRequires : setuptools
+Patch1: 0001-Use-fPIC-as-recommended-by-ld.patch
 
 %description
 ========
@@ -58,13 +59,14 @@ python3 components for the llvmlite package.
 
 %prep
 %setup -q -n llvmlite-0.21.0
+%patch1 -p1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1512830318
+export SOURCE_DATE_EPOCH=1517707805
 python3 setup.py build -b py3
 
 %install
