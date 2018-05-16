@@ -1,6 +1,6 @@
-From 30d4fc0d8bbf7a5214306b5bbc5d0572dbf3d472 Mon Sep 17 00:00:00 2001
-From: William Douglas <william.douglas@intel.com>
-Date: Sun, 4 Feb 2018 01:26:47 +0000
+From fab4a09362cd746e85e9fc7bc6f411ebd4a92e28 Mon Sep 17 00:00:00 2001
+From: George T Kramer <george.t.kramer@intel.com>
+Date: Wed, 16 May 2018 03:16:05 +0000
 Subject: [PATCH] Use fPIC as recommended by ld
 
 ---
@@ -8,18 +8,18 @@ Subject: [PATCH] Use fPIC as recommended by ld
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/ffi/build.py b/ffi/build.py
-index 06045b3..ca87d40 100755
+index e6226d2..9680949 100755
 --- a/ffi/build.py
 +++ b/ffi/build.py
-@@ -110,7 +110,7 @@ def main_posix(kind, library_ext):
-     os.environ['LLVM_LIBS'] = ' '.join(libs.split())
- 
+@@ -112,7 +112,7 @@ def main_posix(kind, library_ext):
      cxxflags = run_llvm_config(llvm_config, ["--cxxflags"])
+     # on OSX cxxflags has null bytes at the end of the string, remove them
+     cxxflags = cxxflags.replace('\0', '')
 -    cxxflags = cxxflags.split() + ['-fno-rtti', '-g']
 +    cxxflags = cxxflags.split() + ['-fno-rtti', '-g', '-fPIC']
      os.environ['LLVM_CXXFLAGS'] = ' '.join(cxxflags)
  
      ldflags = run_llvm_config(llvm_config, ["--ldflags"])
 -- 
-2.15.1
+2.17.0
 
