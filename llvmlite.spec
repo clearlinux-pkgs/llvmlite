@@ -17,7 +17,7 @@ BuildRequires : enum34
 BuildRequires : llvm-dev
 BuildRequires : pbr
 BuildRequires : pip
-BuildRequires : python-dev
+
 BuildRequires : python3-dev
 BuildRequires : setuptools
 Patch1: 0001-Use-fPIC-as-recommended-by-ld.patch
