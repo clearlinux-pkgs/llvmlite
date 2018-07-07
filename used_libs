@@ -11,6 +11,7 @@ libLLVMBitWriter.so.6
 libLLVMCodeGen.so.6
 libLLVMCore.so.6
 libLLVMExecutionEngine.so.6
+libLLVMInstCombine.so.6
 libLLVMLinker.so.6
 libLLVMMC.so.6
 libLLVMMCJIT.so.6
