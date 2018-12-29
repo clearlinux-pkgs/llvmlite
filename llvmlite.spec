@@ -4,7 +4,7 @@
 #
 Name     : llvmlite
 Version  : 0.27.0
-Release  : 20
+Release  : 21
 URL      : https://github.com/numba/llvmlite/archive/v0.27.0.tar.gz
 Source0  : https://github.com/numba/llvmlite/archive/v0.27.0.tar.gz
 Summary  : No detailed summary available
