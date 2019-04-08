@@ -4,7 +4,7 @@
 #
 Name     : llvmlite
 Version  : 0.28.0
-Release  : 25
+Release  : 26
 URL      : https://github.com/numba/llvmlite/archive/v0.28.0.tar.gz
 Source0  : https://github.com/numba/llvmlite/archive/v0.28.0.tar.gz
 Summary  : No detailed summary available
@@ -19,6 +19,7 @@ BuildRequires : buildreq-distutils3
 BuildRequires : enum34
 BuildRequires : llvm
 BuildRequires : llvm-dev
+Patch1: 0002-Remove-the-check-for-LLVM7.patch
 
 %description
 ========
@@ -65,13 +66,14 @@ python3 components for the llvmlite package.
 
 %prep
 %setup -q -n llvmlite-0.28.0
+%patch1 -p1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1552487942
+export SOURCE_DATE_EPOCH=1554743233
 export CC=clang
 export CXX=clang++
 export LD=ld.gold

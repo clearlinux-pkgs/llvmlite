@@ -1,0 +1,32 @@
+From c1c72cd7ab0cdcd1ad01b9827bb28dafa572cf6d Mon Sep 17 00:00:00 2001
+From: Thiago Macieira <thiago.macieira@intel.com>
+Date: Mon, 8 Apr 2019 10:03:56 -0700
+Subject: [PATCH] Remove the check for LLVM7
+
+Signed-off-by: Thiago Macieira <thiago.macieira@intel.com>
+---
+ ffi/build.py | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/ffi/build.py b/ffi/build.py
+index 7d5247d..466cb0d 100755
+--- a/ffi/build.py
++++ b/ffi/build.py
+@@ -109,14 +109,6 @@ def main_posix(kind, library_ext):
+ 
+     out = out.decode('latin1')
+     print(out)
+-    if not out.startswith('7.0.'):
+-        msg = (
+-            "Building llvmlite requires LLVM 7.0.x. Be sure to "
+-            "set LLVM_CONFIG to the right executable path.\n"
+-            "Read the documentation at http://llvmlite.pydata.org/ for more "
+-            "information about building llvmlite.\n"
+-            )
+-        raise RuntimeError(msg)
+ 
+     # Get LLVM information for building
+     libs = run_llvm_config(llvm_config, "--system-libs --libs all".split())
+-- 
+2.21.0
+
