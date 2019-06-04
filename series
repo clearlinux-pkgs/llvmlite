@@ -1,2 +1,2 @@
 #0001-Use-fPIC-as-recommended-by-ld.patch
-0002-Remove-the-check-for-LLVM7.patch
+#0002-Remove-the-check-for-LLVM7.patch
