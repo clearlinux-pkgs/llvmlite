@@ -1,0 +1,25 @@
+From 88438d96f60ff0d9df77868c520d9e221e2ca89d Mon Sep 17 00:00:00 2001
+From: Thiago Macieira <thiago.macieira@intel.com>
+Date: Tue, 1 Oct 2019 18:34:48 -0700
+Subject: [PATCH] Support building against LLVM 9
+
+---
+ ffi/build.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ffi/build.py b/ffi/build.py
+index bc4f57f..26a06a1 100755
+--- a/ffi/build.py
++++ b/ffi/build.py
+@@ -109,7 +109,7 @@ def main_posix(kind, library_ext):
+ 
+     out = out.decode('latin1')
+     print(out)
+-    if not (out.startswith('8.0.') or out.startswith('7.0.')
++    if not (out.startswith('9.0.') or out.startswith('8.0.') or out.startswith('7.0.')
+             or out.startswith('7.1.')):
+         msg = (
+             "Building llvmlite requires LLVM 7.0+ Be sure to "
+-- 
+2.23.0
+

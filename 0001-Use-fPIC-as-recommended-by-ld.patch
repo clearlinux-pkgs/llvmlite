@@ -1,4 +1,4 @@
-From fab4a09362cd746e85e9fc7bc6f411ebd4a92e28 Mon Sep 17 00:00:00 2001
+From ed520a303e02e116cdaed49d9960f4009e613caf Mon Sep 17 00:00:00 2001
 From: George T Kramer <george.t.kramer@intel.com>
 Date: Wed, 16 May 2018 03:16:05 +0000
 Subject: [PATCH] Use fPIC as recommended by ld
@@ -7,9 +7,11 @@ Subject: [PATCH] Use fPIC as recommended by ld
  ffi/build.py | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
---- llvmlite-0.23.2/ffi/build.py~	2018-06-01 20:05:01.000000000 +0000
-+++ llvmlite-0.23.2/ffi/build.py	2018-06-29 14:02:21.649123671 +0000
-@@ -112,7 +112,7 @@
+diff --git a/ffi/build.py b/ffi/build.py
+index 9efb189..bc4f57f 100755
+--- a/ffi/build.py
++++ b/ffi/build.py
+@@ -127,7 +127,7 @@ def main_posix(kind, library_ext):
      cxxflags = run_llvm_config(llvm_config, ["--cxxflags"])
      # on OSX cxxflags has null bytes at the end of the string, remove them
      cxxflags = cxxflags.replace('\0', '')
@@ -18,3 +20,6 @@ Subject: [PATCH] Use fPIC as recommended by ld
  
      # look for SVML
      include_dir = run_llvm_config(llvm_config, ['--includedir']).strip()
+-- 
+2.23.0
+

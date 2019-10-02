@@ -4,7 +4,7 @@
 #
 Name     : llvmlite
 Version  : 0.29.0
-Release  : 29
+Release  : 30
 URL      : https://github.com/numba/llvmlite/archive/v0.29.0/llvmlite-0.29.0.tar.gz
 Source0  : https://github.com/numba/llvmlite/archive/v0.29.0/llvmlite-0.29.0.tar.gz
 Summary  : No detailed summary available
@@ -19,6 +19,8 @@ BuildRequires : buildreq-distutils3
 BuildRequires : enum34
 BuildRequires : llvm
 BuildRequires : llvm-dev
+Patch1: 0001-Use-fPIC-as-recommended-by-ld.patch
+Patch2: 0002-Support-building-against-LLVM-9.patch
 
 %description
 ========
@@ -65,24 +67,27 @@ python3 components for the llvmlite package.
 
 %prep
 %setup -q -n llvmlite-0.29.0
+%patch1 -p1
+%patch2 -p1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1559658744
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1569995071
+export GCC_IGNORE_WERROR=1
 export CC=clang
 export CXX=clang++
 export LD=ld.gold
 unset LDFLAGS
-export AR=gcc-ar
-export RANLIB=gcc-ranlib
-export NM=gcc-nm
-export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FCFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
+export AR=llvm-ar
+export RANLIB=llvm-ranlib
+export NM=llvm-nm
+export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto "
+export FCFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto "
+export FFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto "
+export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto "
 export MAKEFLAGS=%{?_smp_mflags}
 python3 setup.py build
 
