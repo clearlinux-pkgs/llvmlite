@@ -4,7 +4,7 @@
 #
 Name     : llvmlite
 Version  : 0.30.0
-Release  : 33
+Release  : 34
 URL      : https://github.com/numba/llvmlite/archive/v0.30.0/llvmlite-0.30.0.tar.gz
 Source0  : https://github.com/numba/llvmlite/archive/v0.30.0/llvmlite-0.30.0.tar.gz
 Summary  : No detailed summary available
