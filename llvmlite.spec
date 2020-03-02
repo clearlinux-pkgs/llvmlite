@@ -4,10 +4,10 @@
 #
 Name     : llvmlite
 Version  : 0.31.0
-Release  : 38
+Release  : 39
 URL      : https://github.com/numba/llvmlite/archive/v0.31.0/llvmlite-0.31.0.tar.gz
 Source0  : https://github.com/numba/llvmlite/archive/v0.31.0/llvmlite-0.31.0.tar.gz
-Summary  : No detailed summary available
+Summary  : lightweight wrapper around basic LLVM functionality
 Group    : Development/Tools
 License  : BSD-2-Clause
 Requires: llvmlite-license = %{version}-%{release}
@@ -58,6 +58,7 @@ python components for the llvmlite package.
 Summary: python3 components for the llvmlite package.
 Group: Default
 Requires: python3-core
+Provides: pypi(llvmlite)
 
 %description python3
 python3 components for the llvmlite package.
@@ -74,7 +75,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1578155054
+export SOURCE_DATE_EPOCH=1583171861
 # -Werror is for werrorists
 export GCC_IGNORE_WERROR=1
 export CC=clang
